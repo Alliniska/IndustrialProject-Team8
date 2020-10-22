@@ -6,6 +6,7 @@
             <p class="subtitle subfont is-centered" id="playerScore">----</p>
           </article>
       </div>
+      <b-button icon-pack="mdi" @click="refreshLeaderboard" size="is-medium" icon-left="refresh" class="is-black" id="refreshBtn">Refresh leaderboard</b-button>
       <div class="container column is-mobile is-centered is-8">
         <b-table
                 :data="tableData"
@@ -22,6 +23,17 @@
           <router-link to="/"><BlackButton title="Return to Home"></BlackButton></router-link>
         </div>
       </div>
+      <b-notification
+              type="is-info"
+              has-icon
+              aria-close-label="Close notification"
+              v-model="notifDisplay"
+              role="alert"
+              id="infoNotif">
+              <p class="is-centered" style="padding-top: 1rem">
+                  You have already played through this game! To play again, create a new lobby and share the code with your friends!
+              </p>
+        </b-notification>
     </section>
 </template>
 
@@ -37,6 +49,7 @@ export default {
   data() {
     return {
         tableData: [],
+        notifDisplay: false,
         currQuestion: 1,
         currQuestionJSON: null,
         lifeline5050: true,
@@ -63,13 +76,15 @@ export default {
   },
   created() {
     let playerInfo = this.$route.params.playerInfo;
-    console.log(playerInfo);
     let tempPlayerInfo = playerInfo.split(";");
     this.nickname = tempPlayerInfo[0].split("nickname=")[1];
     let lobbyId = tempPlayerInfo[1].split("lobbyId=")[1];
+    let firstLoad = tempPlayerInfo[2].split("firstLoad=")[1];
     document.getElementById("userNickname").innerHTML = this.nickname;
     document.getElementById("lobbyCode").innerHTML = lobbyId;
-    console.log(lobbyId);//debug
+    if (firstLoad == "true") {
+      this.notifDisplay = true;
+    }
     lobbyId = parseInt(lobbyId);
     this.loadResults(lobbyId);
   },
@@ -83,11 +98,8 @@ export default {
         this.refreshLeaderboard();
       }
     },
-
     async getLobbyInfo(id) {
-      console.log(`get lobby info has ${id}`)
       this.lobbyInfo = await fetch(`/quizApi/Lobbies/${id}`).then((res) => res.json());
-      console.log(this.lobbyInfo);
       return true;
     },
 
@@ -98,7 +110,6 @@ export default {
       let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;                                //  update the player's score on screen
       let positionElem = document.getElementById("playerPosition");
-      console.info(`Player position: ${playerPos}`);
       switch (playerPos) {
         case 1:
           positionElem.innerHTML = "1st";
@@ -122,7 +133,6 @@ export default {
      */
     findCurrentPlayer(position, tempTable) {
       for (let playerPos=0; playerPos < tempTable.length; playerPos++) {
-        console.info("in player loop!");
         if (tempTable[playerPos].name === this.nickname) {
             if (position) {
               return playerPos;
@@ -135,9 +145,15 @@ export default {
     },
 
     async refreshLeaderboard() {
-      this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
-      console.info(this.tableData);
-    }
+      let response = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`);
+      if (response.status == 200) {
+        this.tableData = await response.json();
+        this.$buefy.toast.open('Leaderboard refreshed successfully!');
+      }
+      else {
+        this.$buefy.toast.open(`Unable to fetch leaderboard - error ${response.status}`)
+      }
+    },
   },
 
 }
@@ -148,9 +164,17 @@ export default {
   .is-centered{
     text-align: center;
   }
-
+  .pagination-previous, .pagination-next, .pagination-link {
+    background-color: white;
+  }
   .titlefont{
     font-size: 60px;
+  }
+
+  #refreshBtn {
+    top: 4rem;
+    float: right;
+    left: 3rem
   }
 
   .subfont{

@@ -16,8 +16,8 @@
          <b-input placeholder="Enter Lobby ID" size="is-large" icon="account" rounded id="LobbyIDInput"></b-input>
        </b-field>
        <div class="buttons is-centered lobbyBtns">
-        <BlackButton @click.native="getLobbyCode" title="Join Lobby"></BlackButton>
-        <BlackButton @click.native="storeNickname" title="Create Lobby"></BlackButton>
+        <BlackButton @click.native="getLobbyCode" title="Join Lobby" ></BlackButton>
+        <BlackButton @click.native="storeNickname" title="Create Lobby" id="createButton"></BlackButton>
        </div>
     </section>
     <div class="container " id="errorNotifContainer">
@@ -38,42 +38,8 @@
 <script>
 import Header from '~/components/Header'
 import BlackButton from '~/components/BlackButton'
-import GameMusic from '~/components/GameMusic'
 import router from '../router'
-/*
-const LobbyCodeModal = {
-  props: [
-    'lobbyId'
-  ],
-  template: `
-        <form action="">
-          <div class="modal-card" style="width: auto">
-            <header class="modal-card-head">
-                <p class="modal-card-title">Enter Lobby ID</p>
-                <button
-                    type="button"
-                    class="delete"
-                    @click="$emit('close')"/>
-            </header>
-            <section class="modal-card-body">
-                <b-field label="Lobby Code">
-                    <b-input
-                        type="lobbyId"
-                        :value="lobbyId"
-                        placeholder="Lobby code"
-                        required
-                        id="lobbyCodeIn">
-                    </b-input>
-                </b-field>
-            </section>
-            <footer class="modal-card-foot">
-                <button class="button" type="button" @click="$emit('close')">Close</button>
-                <button class="button is-primary" @click="storeNickname">Join Lobby</button>
-            </footer>
-          </div>
-        </form>
-    `
-}*/
+
 export default {
   name: 'home',
   components: {
@@ -90,6 +56,10 @@ export default {
     }
   },
   methods: {
+      /*
+       *  the Store Nickname function is called when creating a new lobby
+       *  It has some basic error checking to make sure that the nickname field isn't empty
+       */
     storeNickname() {
       if (document.getElementById("nicknameInput").value == "") { // if there is nothing in the nickname field
         this.notifDisplay = true;   // show the no nickname warning.
@@ -100,31 +70,33 @@ export default {
       }
     },
 
+    /*
+     *  the Run Lobby Checks function is called as a part of the error checking statements
+     *  it is responsible for making sure that the lobby already exists in the database and it also flags if the player is already in the lobby
+     */
     async runLobbyChecks(lobbyId, nickname) {
-      let response = await fetch(`/quizApi/Lobbies/${lobbyId}`);
-      console.log("RUNNING LOBBY CHECKS");
-      if (response.status == 200) {
+      let response = await fetch(`/quizApi/Lobbies/${lobbyId}`);                    // this GET request attempts to get the lobby info from the DB
+      if (response.status == 200) {                                                 // if it does exist then ...
         let request = {
           name: nickname,
           lobbyId: parseInt(lobbyId)
         }
-        let checkPlayer = await fetch(`/quizApi/Players/getInfo`, {                 // the POST request to get the player info so we can find the question the player is up to
+        let checkPlayer = await fetch(`/quizApi/Players/getInfo`, {                 // ... we send a post request to see if the player exists in the lobby!
           method: 'POST',
           headers: {
             'Content-Type': 'application/json;charset=utf-8'
           },
           body: JSON.stringify(request)
         });
-        if (checkPlayer.status == 200) {  // a player with that name already exists
-          console.log("SHE ALREADY IN THE GAME");
+        if (checkPlayer.status == 200) {                                           // if a player with that name already exists then ....
           this.playerExistsAlready = true;
-          return true;
+          return true;                                                             // we return true and set the flag
         }
-        else {
+        else {                                                                     // otherwise we ignore it and return true anyway
           return true;
         }
       }
-      else {
+      else {                                                                       // if the lobby isn't in the database, it will show this error and not proceed to the next pa
         document.getElementById("errorNotif").innerHTML = "The lobby doesn't exist. Please check what you have entered or speak to your game host.";
         this.notifDisplay = true;   // show the no nickname warning.
         return false;
@@ -132,6 +104,10 @@ export default {
 
     },
 
+    /*
+     *  the Get Lobby Code function is called when the player joins an existing lobby
+     *  it has error checking for the nickname field and the lobby ID field, ensuring that a nickname and a valid 8 digit lobby ID is entered
+     */
     async getLobbyCode() {
       if (document.getElementById("nicknameInput").value == "") { // if there is nothing in the nickname field
         document.getElementById("errorNotif").innerHTML = "Please enter a nickname in the box before clicking on a button.";
@@ -139,11 +115,11 @@ export default {
       }
       else {  // if there is something in the nickname field, then ask for the lobby ID
         document.getElementById("lobbyField").style.visibility = "visible";
+        document.getElementById("createButton").style.visibility = "hidden";
         let lobbyIDinput = document.getElementById("LobbyIDInput").value;
         let nicknameInput = document.getElementById("nicknameInput").value;
         if (lobbyIDinput.length == 8 && !isNaN(lobbyIDinput) && await this.runLobbyChecks(lobbyIDinput, nicknameInput)) { // check if its an 8 digit number
           let playerString = `nickname=${nicknameInput};lobbyId=${lobbyIDinput};playerExists=${this.playerExistsAlready}`;
-          alert(`redirected! ${playerString}`);
           this.$router.push({ name: 'lobby', params: {playerInfo: playerString} });
         }
       }
@@ -169,20 +145,10 @@ export default {
 
 .nickname
 {
-  width: 40rem;
+  width: 60rem;
   margin-top: 5rem;
   margin-left: auto;
   margin-right: auto;
-}
-.joinButton
-{
-  margin-top: 30px;
-  text-align: center;
-}
-.createButton
-{
-  margin-top: 10px;
-  text-align: center;
 }
 
 </style>

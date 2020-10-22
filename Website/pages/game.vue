@@ -170,15 +170,19 @@ export default {
   },
   created() {
     let playerInfo = this.$route.params.playerInfo;
-    console.log(playerInfo);
+    if (playerInfo == undefined) {
+      this.$buefy.dialog.confirm({
+        message: "Error finding player data - redirecting to homepage...",
+        onConfirm: () => window.location.href = "/",
+        onCancel: () => window.location.href = "/"
+      });
+    }
     let tempPlayerInfo = playerInfo.split(";");
     this.nickname = tempPlayerInfo[0].split("nickname=")[1];
     let lobbyId = tempPlayerInfo[1].split("lobbyId=")[1];
     document.getElementById("userNickname").innerHTML = this.nickname;
     document.getElementById("lobbyCode").innerHTML = lobbyId;
-    console.log(lobbyId);//debug
     let id = parseInt(lobbyId);
-    console.log(id);  //debug
     this.startGame(id);
   },
   methods: {
@@ -188,7 +192,6 @@ export default {
      *  Starts the whole game process off. Runs once, takes no parameters.
      */
     async startGame(lobbyId) {
-      console.log("YAY");
       if (await this.getLobbyInfo(lobbyId)) {
         this.getQs();
         this.updatePlayerScoreAndPos(0);
@@ -196,9 +199,7 @@ export default {
     },
 
     async getLobbyInfo(id) {
-      console.log(`get lobby info has ${id}`)
       this.lobbyInfo = await fetch(`/quizApi/Lobbies/${id}`).then((res) => res.json());
-      console.log(this.lobbyInfo);
       return true;
     },
 
@@ -208,10 +209,8 @@ export default {
      *  question, returns the appropriate message, adjusts their score and gets the next question.
      */
     async checkAnswer(buttonId) {
-      console.info(document.getElementById(buttonId).innerHTML);
 
         if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
-          //alert("Correct answer! ✔");
           document.getElementById(buttonId).style.backgroundColor = "green";
           document.getElementById(buttonId+"A").style.backgroundColor = "green";
           // audio for correct answer is played
@@ -221,7 +220,6 @@ export default {
           this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
         }
         else {
-          //alert("Wrong answer! ❌");
           document.getElementById(buttonId).style.backgroundColor = "red";
           document.getElementById(buttonId+"A").style.backgroundColor = "red";
           // audio for incorrect answer is played
@@ -300,7 +298,6 @@ export default {
         answer = 4;
       }
 
-      console.log("ANSWER:"+answer);
 
       let random = this.getRandomNum(1,4);
       while (random==answer) {
@@ -311,35 +308,29 @@ export default {
         random2 = this.getRandomNum(1,4);
       }
 
-      console.log("RANDOM1:"+random);
-      console.log("RANDOM2:"+random2);
 
       if (random2 == 1 || random == 1) {
         document.getElementById("ansOne").style.backgroundColor = "grey";
         document.getElementById("ansOneA").style.backgroundColor = "grey";
         document.getElementById("ansOneA").disabled = true;
-        console.log("HERE1");
       }
 
       if (random2 == 2 || random == 2) {
         document.getElementById("ansTwo").style.backgroundColor = "grey";
         document.getElementById("ansTwoA").style.backgroundColor = "grey";
         document.getElementById("ansTwoA").disabled = true;
-        console.log("HERE2");
       }
 
       if (random2 == 3 || random == 3) {
         document.getElementById("ansThree").style.backgroundColor = "grey";
         document.getElementById("ansThreeA").style.backgroundColor = "grey";
         document.getElementById("ansThreeA").disabled = true;
-        console.log("HERE3");
       }
 
       if (random2 == 4 || random == 4) {
         document.getElementById("ansFour").style.backgroundColor = "grey";
         document.getElementById("ansFourA").style.backgroundColor = "grey";
         document.getElementById("ansFourA").disabled = true;
-        console.log("HERE4");
       }
 
       this.updatePlayerTable();
@@ -358,7 +349,6 @@ export default {
     /*
      *  Update Lobby Table function
      *  Updates the database with the questions generated in the front end so players can pull that data when they want to play
-     *  TODO: the PUT requests need to be fixed API side, so this function will need amending at some point
      */
     async updateLobbyTable() {
       let tempLobbyInfo = {
@@ -372,8 +362,6 @@ export default {
         },
         body: JSON.stringify(this.lobbyInfo)
       }).then((res) => res.json());
-      console.info("IN UPDATE LOBBY");
-      console.info(response);
     },
 
     /*
@@ -386,11 +374,10 @@ export default {
         name: this.nickname,
         Score: this.score,
         lobbyId: this.lobbyInfo.id,
-        questionIndex: this.currQuestion,
+        questionIndex: this.currQuestion+1,
         Lifeline5050: this.lifeline5050,
         LifelineSkip: this.lifelineSkip
       };
-      console.info(playerInfo);
       const response = await fetch('/quizApi/Players', {
         method: 'PUT',
         headers: {
@@ -398,8 +385,6 @@ export default {
         },
         body: JSON.stringify(playerInfo)
       });
-      console.info("update player table !!!");
-      console.info(response);
     },
 
     /*
@@ -410,25 +395,18 @@ export default {
      *  otherwise, it will adjust their score locally and then update the database with the change and pull the latest changes from the database
      *  It also updates the position shown on screen so the player knows where they place on the leaderboard
      *
-     *  TODO: a possible fix to the weird updating bug could be fetching the leaderboard, amending it with the player's new score and then updating the database with the new score.
-     *     NB: This shouldn't affect how the leaderboard position function works
-     *     (the issue is that the database doesn't get updated fast enough for it to show the new changes, so this would be a good way round that.)
      */
     async updatePlayerScoreAndPos(adjustment) {
       if (adjustment == 0) {
         this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
         this.score = this.findCurrentPlayer(false, this.tableData);
+
       }
       else {
         this.score += adjustment;
-        console.info(`Player score is: ${this.score} !!!`);
         let playerPos = 0;
         let tempTable = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json()); //  fetch the latest version of the leaderboard and save it locally in a variable
         playerPos = this.findCurrentPlayer(true, tempTable);                                                    //  get the position of the current player in the leaderboard
-        console.debug(tempTable);                                                                               //  DEBUG statements
-        console.info(`Element at : ${playerPos} !!!`);
-        console.debug(this.tableData);
-        console.info(`Got ${tempTable[playerPos].name}`);
         tempTable[playerPos].score = this.score;                                                                //  update the player's score in the local copy of the database
         this.tableData = tempTable;                                                                             //  update the table shown on screen
         this.updatePlayerTable();                                                                               //  update the database with the new score ONLY
@@ -438,7 +416,6 @@ export default {
       this.tableData.sort((a,b) => b.score - a.score);                                                          //  sort the table
       let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
       let positionElem = document.getElementById("playerPosition");
-      console.info(`Player position: ${playerPos}`);
       switch (playerPos) {
         case 1:
           positionElem.innerHTML = "1st";
@@ -462,7 +439,6 @@ export default {
      */
     findCurrentPlayer(position, tempTable) {
       for (let playerPos=0; playerPos < tempTable.length; playerPos++) {
-        console.info("in player loop!");
         if (tempTable[playerPos].name === this.nickname) {
             if (position) {
               return playerPos;
@@ -493,8 +469,6 @@ export default {
     async getQs() {
       let noData = false;
       let response = await fetch(`/quizApi/Questions/inlobby/${this.lobbyInfo.id}`).then((res) => res.json()).catch((error) => noData = true);
-      console.info("IN HERE");
-      if (!noData) { console.info(response); }
       if (noData) { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
         let easyQSelector = this.getRandomNum(10,30);   // pick a random category from the list
         let medQSelector = this.getRandomNum(10,30);
@@ -505,8 +479,6 @@ export default {
         while (medQSelector == 29 || medQSelector == 20 || medQSelector == easyQSelector) { // does the same as above, but makes sure that the category is different to above.
           medQSelector = this.getRandomNum(10,30);
         }
-        console.info(easyQSelector);
-        console.info(medQSelector);
 
         this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=6&category=${easyQSelector}&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
         this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=8&category=${medQSelector}&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
@@ -516,9 +488,7 @@ export default {
         this.decodeJsonData(true);
       }
       else {  // if not, we just need to decode them!
-        console.info("we got questions at home !");
         this.allQuestions = response;
-        console.info(this.allQuestions);
         this.decodeJsonData(false);
       }
       this.loadQs(true);
@@ -537,8 +507,6 @@ export default {
         },
         body: JSON.stringify(request)
       });
-      console.info("response!");
-      console.info(response);
     },
     /*
      *  Reformat Questions into the API format
@@ -549,9 +517,7 @@ export default {
       let questionIndex = 1;                                                    // used to include question numbers with each questions
       let question;                                                             // used in the for loop to iterate through the tempQuestions array
       let reqQuestion;                                                          // used in the for loop to temporarily store the question in the accepted format for the API
-      console.info("in reformat questions!!")
       for (question of questionArr) {
-        console.info("in for loop!");
         reqQuestion = question;
         reqQuestion.questionIndex = questionIndex;
         questionIndex++;
@@ -586,12 +552,8 @@ export default {
             question.incorrect_answers[i] = decodeURIComponent(escape(window.atob(question.incorrect_answers[i])));
           }
         }
-        console.info("data from Open trivia DBBB !!!");
-        console.info(this.allQuestions);
       }
       else {  // decoding data from DB
-        console.info("decoding DB DATA !!!");
-        console.info(this.allQuestions);
         for (question of this.allQuestions) {
           question.category = decodeURIComponent(escape(window.atob(question.category)));
           question.correct_answer = decodeURIComponent(escape(window.atob(question.correctAnswer)));
@@ -608,8 +570,6 @@ export default {
           }
           question.incorrect_answers = incorrectAnswers;
         }
-        console.info("data from DB !!!");
-        console.info(this.allQuestions);
 
       }
     },
@@ -636,29 +596,22 @@ export default {
         this.lifeline5050 = playerInfo.lifeline5050;
         this.lifelineSkip = playerInfo.lifelineSkip;
       }
-      console.info(`current question: ${this.currQuestion}`);
       if (this.currQuestion == 20) { // TODO: end of game
-        // alert("Game over!");
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
         for (ansButton of allAnsButtons) {
           ansButton.disabled = true;
         }
-        let playerString = `nickname=${this.nickname};lobbyId=${this.lobbyInfo.id}`;
-        console.log(playerString);
+        let playerString;
+        if (firstLoad) {
+          playerString = `nickname=${this.nickname};lobbyId=${this.lobbyInfo.id};firstLoad=true`;
+        }
+        else {
+          playerString = `nickname=${this.nickname};lobbyId=${this.lobbyInfo.id};firstLoad=false`;
+        }
         this.$router.push({ name: 'results', params: { playerInfo: playerString} });
         return true;
       }
-      /*
-      if (this.currQuestion == 6) { // TODO: end of game
-        document.location.href = "http://localhost:3000/results";
-        const allAnsButtons = document.getElementsByClassName("answerButton");
-        let ansButton;
-        for (ansButton of allAnsButtons) {
-          ansButton.disabled = true;
-        }
-        return 0;
-      }*/
       if(this.lifeline5050 == false) {
         document.getElementById("fiftyfifty").disabled = true; //if lifeline has already been used, disable the button
       }
@@ -673,19 +626,16 @@ export default {
 
     /*
      *  Update Question Buttons function
-     *  This function updates the answwwer buttons by randomly selecting one of them to be the correct answer and then populating the remaining buttons with incorrect answers
-     *  TODO: remove the info log commands from this function so that the answers aren't given away
+     *  This function updates the answer buttons by randomly selecting one of them to be the correct answer and then populating the remaining buttons with incorrect answers
      */
     updateQuestion() { // pick a random number between 1 and 4, this will be used to asign the correct answer to a button.
       const correctAnswer = this.getRandomNum(0,3);
       const answerLabels = document.getElementsByClassName("answerLabel");
       answerLabels[correctAnswer].innerHTML = this.allQuestions[this.currQuestion].correct_answer;
-      console.debug(`correct answer - ${this.allQuestions[this.currQuestion].correct_answer}`);
       let counter = 0;
       for (let i = 0; i < answerLabels.length; i++) { // assigns the other answers to the remaining buttons
         if (answerLabels[i].innerHTML != this.allQuestions[this.currQuestion].correct_answer) {
           answerLabels[i].innerHTML = this.allQuestions[this.currQuestion].incorrect_answers[counter];
-          console.debug(`incorrect answer - ${this.allQuestions[this.currQuestion].incorrect_answers[counter]}`);
           counter++;
         }
       }

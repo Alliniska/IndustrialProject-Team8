@@ -54,7 +54,7 @@
 .navbar {
   min-height: 6.25rem;
   text-align: center;
-  width: 80rem;
+  width: 90rem;
   margin: auto;
   background-color: white;
   border: 3px solid black;
