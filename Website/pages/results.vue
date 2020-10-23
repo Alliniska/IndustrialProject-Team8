@@ -167,6 +167,11 @@ export default {
   .pagination-previous, .pagination-next, .pagination-link {
     background-color: white;
   }
+
+  .pagination-ellipsis {
+    background-color: #dbdbdb;
+  }
+
   .titlefont{
     font-size: 60px;
   }
