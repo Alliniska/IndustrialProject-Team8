@@ -2,17 +2,20 @@
 
 ## Build Setup
 
-1)  Install Node.JS
+Step 1. Install Node.JS
 
 ```bash
 
-# run this command in the Website folder to install all dependencies
-2)  $ npm install
+# Step 2: run this command in the Website folder to install all dependencies
+$ npm install
 
-# run the server - accessible at http://localhost:3000
-3)  $ npm run dev
+# Step 3: start the server
+$ npm run dev
 
 ```
+Step 4: In your favourite web browser, go to http://localhost:3000
+
+Step 5: Profit!
 
 The API is only accessible at https://riddlersquizapiv2.azurewebsites.net/ 
 
