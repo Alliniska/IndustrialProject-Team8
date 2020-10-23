@@ -42,6 +42,11 @@
                     <b>Questions</b>
                     <br>
                     OpenTrivia Database
+                    <br>
+                    <br>
+                    <b>Music</b>
+                    <br>
+                    Royalty Free Music from Bensound
                 </p>
                 <p><br> Made with 💖 © Riddlers 2020</p>
                 <br>
