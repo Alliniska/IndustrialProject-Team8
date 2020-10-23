@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using QuizAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace QuizAPI
 {
@@ -24,6 +25,8 @@ namespace QuizAPI
 			services.AddDbContext<LobbyContext>(opt =>
 			  opt.UseSqlServer("empty"));
 			services.AddDbContext<PlayerContext>(opt =>
+			  opt.UseSqlServer("empty"));
+			services.AddDbContext<QuestionContext>(opt =>
 			  opt.UseSqlServer("empty"));
 			services.AddControllers();
 		}

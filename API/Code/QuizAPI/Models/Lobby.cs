@@ -8,11 +8,9 @@ namespace QuizAPI.Models
 {
 	public class Lobby
 	{
+		//Model for records in the Lobby table
 		public int id { get; set; }
-		public string easyQuestions { get; set; }
-		public string mediumQuestions { get; set; }
-		public string hardQuestions { get; set; }
 		public string requestURL { get; set; }
-		public string date { get; set; }
+		public string date { get; set; } //format: YYYY-MM-DDTHH:mm:ss.sssZ
 	}
 }
