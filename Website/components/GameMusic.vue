@@ -1,8 +1,8 @@
 <template>
     <section class="sound">
         <!-- when audio is ready to be played, start method is called -->
-        <audio id="audio" src="~/assets/Quizz.mp3" v-on:canplay="start" loop></audio>
-        <img class="img" src="~/assets/volume_on.png" @click="toggle" alt="Toggle Sound" height="80px" width="80px" align="right">
+        <audio id="audio" src="~/assets/Quizz.mp3" v-on:canplay="start()" loop></audio>
+        <img class="img" id="img" src="~/assets/volume_on.png" @click="toggle()" alt="Toggle Sound" height="80px" width="80px" align="right">
     </section>
 </template>
 
