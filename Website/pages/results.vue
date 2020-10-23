@@ -94,7 +94,6 @@ export default {
       if (await this.getLobbyInfo(id)) {
         document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
         document.getElementById("userNickname").innerHTML = this.nickname;
-        this.updatePlayerScoreAndPos();
         this.refreshLeaderboard();
       }
     },
@@ -104,7 +103,6 @@ export default {
     },
 
     async updatePlayerScoreAndPos() {
-      this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
       this.score = this.findCurrentPlayer(false, this.tableData);
       this.tableData.sort((a,b) => b.score - a.score);                                                          //  sort the table
       let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
@@ -149,6 +147,7 @@ export default {
       if (response.status == 200) {
         this.tableData = await response.json();
         this.$buefy.toast.open('Leaderboard refreshed successfully!');
+        this.updatePlayerScoreAndPos();
       }
       else {
         this.$buefy.toast.open(`Unable to fetch leaderboard - error ${response.status}`)
