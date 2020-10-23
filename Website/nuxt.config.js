@@ -3,7 +3,7 @@ export default {
   ssr: false,
 
   // Target (https://go.nuxtjs.dev/config-target)
-  target: 'static',
+  target: 'server',
 
   // Global page headers (https://go.nuxtjs.dev/config-head)
   head: {
@@ -62,16 +62,16 @@ export default {
   },
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
-    loaders: 
+    loaders:
     {
-      vue: 
+      vue:
       {
-        transformAssetUrls: 
+        transformAssetUrls:
         {
           audio: 'src'
         }
       }
-    
+
     },
     extend(config, ctx) {
       config.module.rules.push({

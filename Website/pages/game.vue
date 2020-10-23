@@ -472,7 +472,6 @@ export default {
       if (noData) { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
         let easyQSelector = this.getRandomNum(10,30);   // pick a random category from the list
         let medQSelector = this.getRandomNum(10,30);
-
         while (easyQSelector == 29 || easyQSelector == 20 ) { // while the category is not Mythology or General Knowledge
           easyQSelector = this.getRandomNum(10,30);   // pick a different category
         }
@@ -544,12 +543,14 @@ export default {
       if (newData) {  // decoding data from Open Trivia API
         for (question of this.allQuestions) {
           question.category = decodeURIComponent(escape(window.atob(question.category)));
-          question.correct_answer = decodeURIComponent(escape(window.atob(question.correct_answer)));
+          question.correct_answer = decodeURIComponent(escape(window.atob(question.correctAnswer)));
           question.difficulty = decodeURIComponent(escape(window.atob(question.difficulty)));
           question.question = decodeURIComponent(escape(window.atob(question.question)));
           question.type = decodeURIComponent(escape(window.atob(question.type)));
+          question.incorrect_answers = [];
           for (let i = 0; i < 3; i++) {
-            question.incorrect_answers[i] = decodeURIComponent(escape(window.atob(question.incorrect_answers[i])));
+            let incAnswerString = `incorrectAnswer${i+1}`;
+            question.incorrect_answers[i] = decodeURIComponent(escape(window.atob(question[incAnswerString])));
           }
         }
       }
