@@ -597,7 +597,7 @@ export default {
         this.lifeline5050 = playerInfo.lifeline5050;
         this.lifelineSkip = playerInfo.lifelineSkip;
       }
-      if (this.currQuestion == 20) { // TODO: end of game
+      if (this.currQuestion >= 20) { // TODO: end of game
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
         for (ansButton of allAnsButtons) {
