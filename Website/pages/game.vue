@@ -88,19 +88,6 @@
         </article>
       </div>
     </div>
-    <!--<button @click="getQsTokens">Refresh Data</button>
-    <div>
-      <h1>Lobby info</h1>
-      <p v-if="$fetchState.pending">Fetching lobby details ...</p>
-      <p v-else-if="$fetchState.error">
-        Error while fetching lobby details: {{ $fetchState.error.message }}
-      </p>
-      <ul v-else>
-        <p>
-          {{ this.lobbyInfo }}
-        </p>
-      </ul>
-    </div>-->
 
   </div> <!-- closing container tag-->
 </template>
@@ -597,7 +584,7 @@ export default {
         this.lifeline5050 = playerInfo.lifeline5050;
         this.lifelineSkip = playerInfo.lifelineSkip;
       }
-      if (this.currQuestion >= 20) { // TODO: end of game
+      if (this.currQuestion >= 20) { 
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
         for (ansButton of allAnsButtons) {

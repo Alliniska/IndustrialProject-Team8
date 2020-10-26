@@ -1,10 +1,6 @@
 <template>
     <div class="section is-fullheight">
       <div class="container column is-mobile is-centered is-8">
-          <!--<b-button type="is-primary" @click="createLobby">
-            <b-icon class="icon" pack="mdi" icon="refresh">
-            </b-icon>
-          </b-button>--> <!--////////////////FOR HOMEPAGE/////////////////-->
           <LobbyCodeLbl title="Players"></LobbyCodeLbl>
       </div>
       <div class="container column is-mobile is-centered is-8">

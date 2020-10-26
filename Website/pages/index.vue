@@ -1,12 +1,8 @@
 <template>
   <div>
-    <!--<GameMusic />-->
     <section class="section">
       <div class="columns is-mobile">
-        <!--<Header></Header>-->
       </div>
-      <!-- <Button title="How To Play"></Button>
-      <Button title="About"></Button> -->
     </section>
     <section class="nickname">
        <b-field>
