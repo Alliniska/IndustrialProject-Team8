@@ -8,7 +8,7 @@ describe('Testing the GameMusic component', () => {
         expect(wrapper.vm).toBeTruthy()
     });
 
-    it('emits toggle when image is clicked', () => {
+    it('calls toggle method when image is clicked', () => {
         const wrapper = shallowMount(GameMusic);
         expect(wrapper.find('#img').exists()).toBe(true)
         const img = wrapper.find('#img')

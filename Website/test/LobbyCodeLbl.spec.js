@@ -22,7 +22,7 @@ describe('Testing the LobbyCodeLbl component', () => {
         expect(wrapper.vm).toBeTruthy()
     });
 
-    it("Test if title is added to title", () => {
+    it("Test if title is added to tile", () => {
         const wrapper = shallowMount(LobbyCodeLbl,{
             props: 
             {
